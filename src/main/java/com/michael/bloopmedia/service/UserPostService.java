@@ -1,5 +1,7 @@
 package com.michael.bloopmedia.service;
 
+import com.cloudinary.utils.ObjectUtils;
+import com.michael.bloopmedia.configuration.CloudinaryConfig;
 import com.michael.bloopmedia.model.post.MiniUserInfo;
 import com.michael.bloopmedia.model.post.PostContent;
 import com.michael.bloopmedia.model.post.UserPost;
@@ -12,9 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserPostService {
@@ -24,17 +28,31 @@ public class UserPostService {
     @Autowired
     UserRepository userRepo;
 
-    public UserPost createPost(List<MultipartFile> files, String description,String userId ){
+    @Autowired
+    CloudinaryConfig cloudinaryConfig;
+
+    public UserPost createPost(List<MultipartFile> files, String description,String userId ) throws IOException {
         User user = userRepo.findById(userId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         MiniUserInfo userInfo = new MiniUserInfo();
+        userInfo.setId(user.getId());
         userInfo.setUsername(user.getUserName());
         userInfo.setProfileImage(user.getProfilePicture());
+
+        List<String> uploadedFileUrlList = new ArrayList<>();
+
+        // upload post images
+        for(MultipartFile file: files){
+        Map uploadResult =cloudinaryConfig.cloudinary().uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        uploadedFileUrlList.add(uploadResult.get("url").toString());
+
+        }
+
 
 
         // set postContent
         PostContent content = new PostContent();
-        content.setPostFiles(new ArrayList<>());
+        content.setPostFiles(uploadedFileUrlList);
         content.setDescription(description);
 
 
@@ -44,8 +62,15 @@ public class UserPostService {
         post.setContent(content);
         post.setPostDateTime(new Date());
 
+        UserPost finalPost = postRepository.save(post);
 
-        return postRepository.save(post);
+        // update user post list
+        List<String> prevPostList = user.getPosts();
+        prevPostList.add(finalPost.getId());
+        user.setPosts(prevPostList);
+        userRepo.save(user);
+
+        return finalPost;
 
 
     }

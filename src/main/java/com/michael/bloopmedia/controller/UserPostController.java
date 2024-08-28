@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 @RestController
@@ -20,20 +21,20 @@ public class UserPostController {
     @PostMapping("/create-post/{userId}")
     protected ResponseEntity<UserPost> createPost
             (@PathVariable String userId,
-             @RequestParam MultipartFile file1,
-             @RequestParam MultipartFile file2,
-             @RequestParam MultipartFile file3,
-             @RequestParam String postDescription
+             @ModelAttribute("file1") MultipartFile file1,
+             @ModelAttribute("file2") MultipartFile file2,
+             @ModelAttribute("file3") MultipartFile file3,
+             @ModelAttribute(name = "post-description") String postDescription
 
-             ){
+             ) throws IOException {
         ArrayList<MultipartFile> fileList = new ArrayList<>();
-        if(!file1.isEmpty()){
+        if(!(file1==null)){
         fileList.add(file1);
         }
-        if(!file2.isEmpty()){
+        if(!(file2==null)){
         fileList.add(file2);
         }
-        if(!file3.isEmpty()){
+        if(!(file3 == null)){
         fileList.add(file2);
         }
 

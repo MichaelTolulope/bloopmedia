@@ -24,6 +24,7 @@ public class UserService {
     public User registerUser(User user){
         user.setProfilePicture("");
         user.setFriendsList(new ArrayList<>());
+        user.setPosts(new ArrayList<>());
         user.setPassword(passwordEncoder.encode(user.getPassword())); // encode password
         return userRepo.save(user);
     }
