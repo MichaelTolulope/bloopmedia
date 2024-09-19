@@ -28,4 +28,5 @@ public class User {
     private Date dateOfBirth;
     private List<String> friendsList;
     private List<String> posts;
+    private List<String> likedPosts;
 }

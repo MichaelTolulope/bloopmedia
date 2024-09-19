@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.List;
 
 @Document
 @Data
@@ -20,5 +21,8 @@ public class UserPost {
     private MiniUserInfo user;
     private PostContent content;
     private Date postDateTime;
+    private List<Like> likes;
+    private int likeCount;
+    private List<Comment> comments;
 
 }
